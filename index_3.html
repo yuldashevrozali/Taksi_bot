@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Taksi Zakaz</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16161a;
+    --card: #1e1e24;
+    --border: #2a2a35;
+    --accent: #f5c518;
+    --accent2: #ff6b35;
+    --text: #f0f0f5;
+    --muted: #7a7a95;
+    --input-bg: #121216;
+    --radius: 14px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  body {
+    min-height: 100vh;
+    padding: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(245,197,24,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 100% 80%, rgba(255,107,53,0.08) 0%, transparent 50%),
+      var(--bg);
+  }
+
+  .header {
+    background: linear-gradient(135deg, #f5c518 0%, #ff6b35 100%);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .header-icon {
+    font-size: 42px;
+    margin-bottom: 8px;
+    display: block;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  }
+  .header h1 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #0d0d0f;
+    letter-spacing: -0.5px;
+  }
+  .header p {
+    font-size: 12px;
+    color: rgba(13,13,15,0.7);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .container {
+    padding: 20px 16px 120px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    margin-top: 22px;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  input[type="text"], input[type="tel"] {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 14px 14px 42px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus, input[type="tel"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(245,197,24,0.12);
+  }
+  input::placeholder { color: var(--muted); }
+
+  /* SERVICE TYPE TOGGLE */
+  .service-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+  .service-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .service-btn .svc-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+  .service-btn .svc-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+  .service-btn.active {
+    border-color: var(--accent);
+    background: rgba(245,197,24,0.08);
+  }
+  .service-btn.active .svc-title { color: var(--accent); }
+  .service-btn.active-delivery {
+    border-color: var(--accent2);
+    background: rgba(255,107,53,0.08);
+  }
+  .service-btn.active-delivery .svc-title { color: var(--accent2); }
+
+  /* PASSENGERS */
+  .passengers-section {
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+    max-height: 0;
+    opacity: 0;
+  }
+  .passengers-section.visible {
+    max-height: 120px;
+    opacity: 1;
+  }
+
+  .passenger-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding-top: 2px;
+  }
+  .passenger-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+  }
+  .passenger-btn .p-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--muted);
+    display: block;
+  }
+  .passenger-btn .p-label {
+    font-size: 9px;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+  .passenger-btn.active {
+    border-color: var(--accent);
+    background: rgba(245,197,24,0.1);
+  }
+  .passenger-btn.active .p-num { color: var(--accent); }
+  .passenger-btn.active .p-label { color: var(--accent); }
+
+  /* SUBMIT BUTTON */
+  .submit-area {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 16px 20px;
+    background: linear-gradient(to top, var(--bg) 70%, transparent);
+    z-index: 100;
+  }
+  .submit-btn {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    display: block;
+    background: linear-gradient(135deg, #f5c518 0%, #ff9a18 100%);
+    border: none;
+    border-radius: 16px;
+    padding: 17px 20px;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: #0d0d0f;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 8px 32px rgba(245,197,24,0.3);
+  }
+  .submit-btn:disabled {
+    background: var(--card);
+    color: var(--muted);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  .submit-btn:not(:disabled):active {
+    transform: scale(0.97);
+  }
+  .submit-btn .btn-icon { margin-right: 8px; }
+
+  /* DELIVERY SUBMIT */
+  .submit-btn.delivery {
+    background: linear-gradient(135deg, #ff6b35 0%, #ff3d00 100%);
+    box-shadow: 0 8px 32px rgba(255,107,53,0.3);
+  }
+
+  .validation-msg {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    min-height: 16px;
+    transition: color 0.2s;
+  }
+  .validation-msg.error { color: #ff4f4f; }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0 0;
+  }
+
+  /* SUCCESS OVERLAY */
+  .success-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  .success-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .success-icon { font-size: 72px; margin-bottom: 20px; animation: bounce 0.6s ease; }
+  .success-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .success-text { color: var(--muted); font-size: 14px; text-align: center; padding: 0 30px; }
+  @keyframes bounce {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .phone-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    padding-left: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-icon">🚖</span>
+  <h1>TAKSI XIZMATI</h1>
+  <p>Tez va qulay yetkazib berish</p>
+</div>
+
+<div class="container">
+
+  <!-- SHAXSIY MA'LUMOTLAR -->
+  <div class="section-label">👤 Shaxsiy ma'lumotlar</div>
+
+  <div class="input-group">
+    <span class="input-icon">✍️</span>
+    <input type="text" id="ism" placeholder="Ismingiz" autocomplete="off" />
+  </div>
+
+  <div class="input-group">
+    <span class="input-icon">📞</span>
+    <input type="tel" id="telefon" placeholder="+998 XX XXX XX XX" autocomplete="off" />
+  </div>
+  <p class="phone-hint">+998 bilan boshlang</p>
+
+  <!-- MANZIL -->
+  <div class="section-label" style="margin-top:18px">📍 Manzil</div>
+
+  <div class="input-group">
+    <span class="input-icon">🔵</span>
+    <input type="text" id="qayerdan" placeholder="Qayerdan?" autocomplete="off" />
+  </div>
+
+  <div class="input-group">
+    <span class="input-icon">🔴</span>
+    <input type="text" id="qayerga" placeholder="Qayerga?" autocomplete="off" />
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- XIZMAT TURI -->
+  <div class="section-label" style="margin-top:18px">🎯 Xizmat turini tanlang</div>
+
+  <div class="service-toggle">
+    <div class="service-btn active" id="btn-taksi" onclick="selectService('taksi')">
+      <span class="svc-icon">🚕</span>
+      <span class="svc-title">TAKSI</span>
+    </div>
+    <div class="service-btn" id="btn-yetkazib" onclick="selectService('yetkazib')">
+      <span class="svc-icon">📦</span>
+      <span class="svc-title">YETKAZIB BERISH</span>
+    </div>
+  </div>
+
+  <!-- YO'LOVCHILAR (faqat taksi uchun) -->
+  <div class="passengers-section visible" id="passengers-section">
+    <div class="section-label" style="margin-top:18px">👥 Necha kishi?</div>
+    <div class="passenger-grid">
+      <div class="passenger-btn active" id="p1" onclick="selectPassenger(1)">
+        <span class="p-num">1</span>
+        <span class="p-label">kishi</span>
+      </div>
+      <div class="passenger-btn" id="p2" onclick="selectPassenger(2)">
+        <span class="p-num">2</span>
+        <span class="p-label">kishi</span>
+      </div>
+      <div class="passenger-btn" id="p3" onclick="selectPassenger(3)">
+        <span class="p-num">3</span>
+        <span class="p-label">kishi</span>
+      </div>
+      <div class="passenger-btn" id="p4" onclick="selectPassenger(4)">
+        <span class="p-num">4</span>
+        <span class="p-label">kishi</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUBMIT -->
+<div class="submit-area">
+  <button class="submit-btn" id="submitBtn" onclick="submitOrder()">
+    <span class="btn-icon">🔍</span> TAKSI QIDIRISH
+  </button>
+  <div class="validation-msg" id="validMsg">Barcha maydonlarni to'ldiring</div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-icon">✅</div>
+  <div class="success-title">ZAKAZ QABUL!</div>
+  <div class="success-text">Zakaringiz guruhga yuborildi. Tez orada siz bilan bog'lanamiz!</div>
+</div>
+
+<script>
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.ready(); tg.expand(); }
+
+  let selectedService = 'taksi';
+  let selectedPassengers = 1;
+
+  function selectService(type) {
+    selectedService = type;
+    const btnTaksi = document.getElementById('btn-taksi');
+    const btnYetkazib = document.getElementById('btn-yetkazib');
+    const passSection = document.getElementById('passengers-section');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (type === 'taksi') {
+      btnTaksi.className = 'service-btn active';
+      btnYetkazib.className = 'service-btn';
+      passSection.classList.add('visible');
+      submitBtn.className = 'submit-btn';
+      submitBtn.innerHTML = '<span class="btn-icon">🔍</span> TAKSI QIDIRISH';
+    } else {
+      btnTaksi.className = 'service-btn';
+      btnYetkazib.className = 'service-btn active-delivery';
+      passSection.classList.remove('visible');
+      submitBtn.className = 'submit-btn delivery';
+      submitBtn.innerHTML = '<span class="btn-icon">📦</span> ZAKAZ BERISH';
+    }
+    validateForm();
+  }
+
+  function selectPassenger(num) {
+    selectedPassengers = num;
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById('p' + i).className = 'passenger-btn' + (i === num ? ' active' : '');
+    }
+    validateForm();
+  }
+
+  function getVal(id) {
+    return document.getElementById(id).value.trim();
+  }
+
+  function validateForm() {
+    const ism = getVal('ism');
+    const tel = getVal('telefon');
+    const qayerdan = getVal('qayerdan');
+    const qayerga = getVal('qayerga');
+
+    const phoneValid = tel.startsWith('+998') && tel.replace(/\s/g,'').length >= 13;
+
+    let missingFields = [];
+    if (!ism) missingFields.push('Ism');
+    if (!tel) missingFields.push('Telefon');
+    else if (!phoneValid) missingFields.push('To\'g\'ri telefon raqam (+998...)');
+    if (!qayerdan) missingFields.push('Qayerdan');
+    if (!qayerga) missingFields.push('Qayerga');
+
+    const btn = document.getElementById('submitBtn');
+    const msg = document.getElementById('validMsg');
+
+    if (missingFields.length === 0) {
+      btn.disabled = false;
+      msg.textContent = '✓ Barcha maydonlar to\'ldirildi';
+      msg.className = 'validation-msg';
+      msg.style.color = '#4caf50';
+    } else {
+      btn.disabled = true;
+      if (missingFields.length <= 2) {
+        msg.textContent = '⚠ ' + missingFields.join(', ') + ' kerak';
+        msg.className = 'validation-msg error';
+      } else {
+        msg.textContent = 'Barcha maydonlarni to\'ldiring';
+        msg.className = 'validation-msg';
+        msg.style.color = 'var(--muted)';
+      }
+    }
+  }
+
+  function submitOrder() {
+    const ism = getVal('ism');
+    const tel = getVal('telefon');
+    const qayerdan = getVal('qayerdan');
+    const qayerga = getVal('qayerga');
+
+    const now = new Date();
+    const vaqt = now.toLocaleString('uz-UZ');
+
+    const data = {
+      xizmat: selectedService,
+      ism, telefon: tel,
+      qayerdan, qayerga,
+      yolovchilar: selectedService === 'taksi' ? selectedPassengers : null,
+      vaqt
+    };
+
+    const jsonData = JSON.stringify(data);
+    const BOT_TOKEN = '8979521954:AAGyamObK0Q3l6W37eExCOfEIHTyJZiKo-Y';
+    const GROUP_ID = '-1003633602825';
+
+    const tgApp = window.Telegram && window.Telegram.WebApp;
+
+    // sendData orqali botga yuborish
+    if (tgApp && typeof tgApp.sendData === 'function') {
+      try {
+        tgApp.sendData(jsonData);
+        return;
+      } catch(e) {
+        console.error('sendData xatosi:', e);
+      }
+    }
+
+    // Agar sendData ishlamasa — to'g'ridan Telegram Bot API ga yuborish
+    const { xizmat, ism: ismV, telefon, qayerdan: qd, qayerga: qg, yolovchilar, vaqt: v } = data;
+    let text = xizmat === 'taksi'
+      ? '🚖 YANGI TAKSI ZAKAZI\n━━━━━━━━━━━━━━━━\n👤 Ism: ' + ismV + '\n📞 Tel: ' + telefon + '\n📍 Qayerdan: ' + qd + '\n🏁 Qayerga: ' + qg + '\n👥 Yolovchilar: ' + yolovchilar + ' kishi\n━━━━━━━━━━━━━━━━\n⏰ Vaqt: ' + v
+      : '📦 YANGI YETKAZIB BERISH\n━━━━━━━━━━━━━━━━\n👤 Ism: ' + ismV + '\n📞 Tel: ' + telefon + '\n📍 Qayerdan: ' + qd + '\n🏁 Qayerga: ' + qg + '\n━━━━━━━━━━━━━━━━\n⏰ Vaqt: ' + v;
+
+    fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: GROUP_ID, text: text })
+    })
+    .then(r => r.json())
+    .then(r => { console.log('Guruhga yuborildi:', r); showSuccess(); })
+    .catch(e => { console.error('Xato:', e); showSuccess(); });
+  }
+
+  function showSuccess() {
+    document.getElementById('successOverlay').classList.add('show');
+    setTimeout(() => {
+      if (tg) tg.close();
+    }, 2500);
+  }
+
+  // Real-time validation
+  ['ism','telefon','qayerdan','qayerga'].forEach(id => {
+    document.getElementById(id).addEventListener('input', validateForm);
+  });
+
+  // Telefon formatlash
+  document.getElementById('telefon').addEventListener('input', function() {
+    let val = this.value.replace(/[^\d+]/g, '');
+    if (val && !val.startsWith('+')) val = '+' + val;
+    this.value = val;
+    validateForm();
+  });
+
+  // Boshlang'ich holat
+  validateForm();
+</script>
+</body>
+</html>
