@@ -552,5 +552,28 @@
 console.log("Telegram object:", window.Telegram);
 console.log("Telegram WebApp:", window.Telegram?.WebApp);
 </script>
+ <script>
+function submitOrder() {
+  console.log("🔥 BUTTON BOSILDI");
+
+  const data = {
+    test: "hello"
+  };
+
+  const tgApp = window.Telegram?.WebApp;
+
+  console.log("tgApp:", tgApp);
+
+  if (tgApp && typeof tgApp.sendData === 'function') {
+    console.log("🚀 sendData ketmoqda");
+
+    tgApp.sendData(JSON.stringify(data));
+
+    console.log("✅ sendData yuborildi");
+  } else {
+    console.log("❌ tgApp YOQ");
+  }
+}
+</script>
 </body>
 </html>
