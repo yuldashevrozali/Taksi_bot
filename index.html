@@ -397,21 +397,6 @@
   <div class="success-title">ZAKAZ QABUL!</div>
   <div class="success-text">Zakaringiz guruhga yuborildi. Tez orada siz bilan bog'lanamiz!</div>
 </div>
- <script>
-function submitOrder() {
-  alert("BUTTON ISHLADI");
-
-  const tgApp = window.Telegram.WebApp;
-
-  alert("sendData mavjud: " + typeof tgApp.sendData);
-
-  tgApp.sendData(JSON.stringify({
-    test: "hello"
-  }));
-
-  alert("DATA YUBORILDI");
-}
-</script>
 
 <script>
   const tg = window.Telegram?.WebApp;
@@ -492,31 +477,23 @@ function submitOrder() {
   }
 
   function submitOrder() {
+    const ism = getVal('ism');
+    const tel = getVal('telefon');
+    const qayerdan = getVal('qayerdan');
+    const qayerga = getVal('qayerga');
 
-  console.log("🔥 BUTTON BOSILDI");
+    const now = new Date();
+    const vaqt = now.toLocaleString('uz-UZ');
 
-  const data = {
-    xizmat: selectedService,
-    ism: getVal('ism'),
-    telefon: getVal('telefon'),
-    qayerdan: getVal('qayerdan'),
-    qayerga: getVal('qayerga'),
-    yolovchilar: selectedPassengers,
-    vaqt: new Date().toLocaleString('uz-UZ')
-  };
-
-  console.log("📦 DATA:", data);
-
-  const tg = window.Telegram.WebApp;
-
-  // TELEGRAMGA YUBORISH
-  tg.sendData(JSON.stringify(data));
-
-  console.log("🚀 sendData yuborildi");
-
-  // SUCCESS
-  alert("Zakaz yuborildi ✅");
-}
+     const data = {
+       xizmat: selectedService,
+       ism: ism,
+       telefon: tel,
+       qayerdan: qayerdan,
+       qayerga: qayerga,
+       yolovchilar: selectedService === 'taksi' ? selectedPassengers : null,
+       vaqt
+     };
 
     const jsonData = JSON.stringify(data);
     const BOT_TOKEN = '8979521954:AAGyamObK0Q3l6W37eExCOfEIHTyJZiKo-Y';
@@ -572,34 +549,6 @@ function submitOrder() {
 
   // Boshlang'ich holat
   validateForm();
-</script>
- 
- <script>
-console.log("Telegram object:", window.Telegram);
-console.log("Telegram WebApp:", window.Telegram?.WebApp);
-</script>
- <script>
-function submitOrder() {
-  console.log("🔥 BUTTON BOSILDI");
-
-  const data = {
-    test: "hello"
-  };
-
-  const tgApp = window.Telegram?.WebApp;
-
-  console.log("tgApp:", tgApp);
-
-  if (tgApp && typeof tgApp.sendData === 'function') {
-    console.log("🚀 sendData ketmoqda");
-
-    tgApp.sendData(JSON.stringify(data));
-
-    console.log("✅ sendData yuborildi");
-  } else {
-    console.log("❌ tgApp YOQ");
-  }
-}
 </script>
 </body>
 </html>
