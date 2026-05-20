@@ -492,21 +492,31 @@ function submitOrder() {
   }
 
   function submitOrder() {
-    const ism = getVal('ism');
-    const tel = getVal('telefon');
-    const qayerdan = getVal('qayerdan');
-    const qayerga = getVal('qayerga');
 
-    const now = new Date();
-    const vaqt = now.toLocaleString('uz-UZ');
+  console.log("🔥 BUTTON BOSILDI");
 
-    const data = {
-      xizmat: selectedService,
-      ism, telefon: tel,
-      qayerdan, qayerga,
-      yolovchilar: selectedService === 'taksi' ? selectedPassengers : null,
-      vaqt
-    };
+  const data = {
+    xizmat: selectedService,
+    ism: getVal('ism'),
+    telefon: getVal('telefon'),
+    qayerdan: getVal('qayerdan'),
+    qayerga: getVal('qayerga'),
+    yolovchilar: selectedPassengers,
+    vaqt: new Date().toLocaleString('uz-UZ')
+  };
+
+  console.log("📦 DATA:", data);
+
+  const tg = window.Telegram.WebApp;
+
+  // TELEGRAMGA YUBORISH
+  tg.sendData(JSON.stringify(data));
+
+  console.log("🚀 sendData yuborildi");
+
+  // SUCCESS
+  alert("Zakaz yuborildi ✅");
+}
 
     const jsonData = JSON.stringify(data);
     const BOT_TOKEN = '8979521954:AAGyamObK0Q3l6W37eExCOfEIHTyJZiKo-Y';
