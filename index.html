@@ -397,6 +397,21 @@
   <div class="success-title">ZAKAZ QABUL!</div>
   <div class="success-text">Zakaringiz guruhga yuborildi. Tez orada siz bilan bog'lanamiz!</div>
 </div>
+ <script>
+function submitOrder() {
+  alert("BUTTON ISHLADI");
+
+  const tgApp = window.Telegram.WebApp;
+
+  alert("sendData mavjud: " + typeof tgApp.sendData);
+
+  tgApp.sendData(JSON.stringify({
+    test: "hello"
+  }));
+
+  alert("DATA YUBORILDI");
+}
+</script>
 
 <script>
   const tg = window.Telegram?.WebApp;
@@ -548,6 +563,7 @@
   // Boshlang'ich holat
   validateForm();
 </script>
+ 
  <script>
 console.log("Telegram object:", window.Telegram);
 console.log("Telegram WebApp:", window.Telegram?.WebApp);
